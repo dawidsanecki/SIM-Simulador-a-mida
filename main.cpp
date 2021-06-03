@@ -1,7 +1,17 @@
 #include "iostream"
 using namespace std;
 
-void Simulation(){
+void SimulationWithoutChange(){
+
+    int ticks = 0; //Ticks son nuestro metodo de medir el tiempo, cada tick representa un minuto
+    while(ticks < 720){
+        ticks++;
+
+    }
+
+}
+
+void SimulationWithChange(int MinutosHastaCambio, double ProbabilidadDeCambio){
 
     int ticks = 0; //Ticks son nuestro metodo de medir el tiempo, cada tick representa un minuto
     while(ticks < 720){
@@ -16,21 +26,29 @@ void ScenarioExecute(){
     cout << "Escoge uno de los 2 escenarios" << endl << "1.3 cajeros con colas individuales" << endl << "2.3 cajeros con colas individuales pero los clientes pueden cambiar de cola despues de estar 15 minutos en una" << endl;
     cin >> escenario;
     if(escenario == 1){
-        Simulation();
+        SimulationWithoutChange();
     }
     else if(escenario == 2){
-        Simulation();
+        SimulationWithChange();
     }
 }
 
 void DataImport(){
     cout << "Introduce los siguientes datos para tu simulación" << endl;
-    cout << "El valor de la X" << endl;
-    int X;
-    cin >> X;
-    cout << "El valor de la Y" << endl;
-    int Y;
-    cin >> Y;
+    cout << "Quieres que los clientes puedan cambiar de cola despues de un tiempo?" << endl << "[y/n]" << endl;
+    string ans;
+    if(ans == "y"){
+        cout << "Cuantos minutos quieres que los clientes se esperan antes de cambiar de cola?" << endl;
+        int TiempoCambio;
+        cin >> TiempoCambio;
+        cout << "Que probabilidad de cambio quieres asignar? (0 - 1)" << endl;
+        double ProbabilidadCambio;
+        cin >> ProbabilidadCambio;
+        SimulationWithChange(TiempoCambio, ProbabilidadCambio);
+    }
+    else if(ans == "n"){
+        SimulationWithoutChange();
+    }
 }
 
 int main(){
