@@ -87,7 +87,7 @@ public:
         return cola.size();
     }
 };
-
+//Si offset es igual a 0 es el caso de que se escoge la cola sin estar en una, si offset es diferente se hace el caso de cambiar de cola
 int CompararColas(Cajero &c1, Cajero &c2, Cajero &c3,int offset){
     cout << "im here" << endl;
     int cl1 = c1.GetLength();
