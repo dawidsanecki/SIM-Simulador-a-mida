@@ -84,45 +84,45 @@ public:
     }
 };
 
-int CompararColas(Cajero &c1, Cajero &c2, Cajero &c3){
+int CompararColas(Cajero &c1, Cajero &c2, Cajero &c3,int offset){
     cout << "im here" << endl;
     int cl1 = c1.GetLength();
     int cl2 = c2.GetLength();
     int cl3 = c3.GetLength();
     cout << cl1 << " " << cl2 << " " << cl3 << endl;
     //3 colas iguales
-    if(cl1 == cl2 and cl2 == cl3){
+    if(cl1-offset == cl2 and cl2 == cl3){
         int numr = rand() % 3;
         if(numr == 0) return 1;
         else if(numr == 1) return 2;
         else return 3;
     }
     //2 colas iguales
-    else if(cl1 == cl2 && cl1 < cl3){
+    else if(cl1-offset == cl2 && cl1-offset < cl3){
         int numr = rand() % 2;
         if(numr == 0) return 1;
         else return 2;
     }
-    else if(cl1 == cl2 && cl1 > cl3) return 3;
+    else if(cl1-offset == cl2 && cl1-offset > cl3) return 3;
 
-    else if(cl1 == cl3 && cl1 < cl2){
+    else if(cl1-offset == cl3 && cl1-offset < cl2){
         int numr = rand() % 2;
         if(numr == 0) return 1;
         else return 3;
     }
-    else if(cl1 == cl3 && cl1 > cl2) return 2;
+    else if(cl1-offset == cl3 && cl1-offset > cl2) return 2;
 
-    else if(cl2 == cl3 && cl1 > cl2){
+    else if(cl2 == cl3 && cl1-offset > cl2){
         int numr = rand() % 2;
         if(numr == 0) return 2;
         else return 3;
     }
-    else if(cl2 == cl3 && cl1 < cl2) return 1;
+    else if(cl2 == cl3 && cl1-offset < cl2) return 1;
 
     //3 cola diferentes
-    else if(cl1 < cl2 && cl1 < cl3) return 1;
-    else if(cl2 < cl3 && cl2 < cl1) return 2;
-    else if(cl3 < cl1 && cl3 < cl2) return 3;
+    else if(cl1-offset < cl2 && cl1-offset < cl3) return 1;
+    else if(cl2 < cl3 && cl2 < cl1-offset) return 2;
+    else if(cl3 < cl1-offset && cl3 < cl2) return 3;
     return 1;
 
 }
@@ -141,7 +141,7 @@ void SimulationWithoutChange(int IntervalLLegada, int SeedCajero1, int SeedCajer
         if(ticks % IntervalLLegada == 0){
             Cliente c;
             c.SetTiempoEntrada(ticks);
-            int colaD = CompararColas(c1,c2,c3);
+            int colaD = CompararColas(c1,c2,c3,0);
             if(colaD == 1){
                 c1.EntrarCola(c);
                 cout << "entrado a 1" << endl;
@@ -243,9 +243,110 @@ void SimulationWithChange(int IntervalLLegada,int MinutosHastaCambio, double Pro
 
     int ticks = 0; //Ticks son nuestro metodo de medir el tiempo, cada tick representa un minuto
     vector<Cliente> ClientesSalida; //Clientes que salen de la simulacion
-    while(ticks < 720){
-        ticks++;
+    Cajero c1;
+    Cajero c2;
+    Cajero c3;
+    int offset = 8;
+    cout << "entrada while" << endl;
+    while(ticks < 60){
+        //Entrada nuevo cliente cada intervalo
+        if(ticks % IntervalLLegada == 0){
+            Cliente c;
+            c.SetTiempoEntrada(ticks);
+            int colaD = CompararColas(c1,c2,c3,0);
+            if(colaD == 1){
+                c1.EntrarCola(c);
+                cout << "entrado a 1" << endl;
+            }
+            if(colaD == 2) {
+                c2.EntrarCola(c);
+                cout << "entrado a 2" << endl;
+            }
+            if(colaD == 3) {
+                c3.EntrarCola(c);
+                cout << "entrado a 3" << endl;
+            }
 
+        }
+        //Scan colas
+        //Cola 1
+        //Si el cajero esta ocupado restamos el tiempo restante
+        if(c1.GetOcupado()){
+            if(c1.getTiempoRestante() == 0 && c1.GetLength() > 0) {
+                c1.switchOcupado();
+                Cliente caux = c1.getClienteActual();
+                caux.GuardarTiempoSalida(ticks);
+                ClientesSalida.push_back(caux);
+
+                c1.SalirCola();
+
+                if(c1.GetLength() > 0) {
+                    c1.setClienteActual(c1.getPrimero());
+                    c1.setTiempoRestante((rand() % 5) + offset);
+                }
+
+            }
+        }
+            //El cajero no esta ocupado
+        else if(!c1.GetOcupado() && c1.GetLength() > 0){
+            c1.setClienteActual(c1.getPrimero());
+            c1.setTiempoRestante((rand() % 5) + 1);
+            c1.switchOcupado();
+        }
+        c1.restarTiempoRestante();
+
+        //Cola 2
+        if(c2.GetOcupado()){
+            if(c2.getTiempoRestante() == 0 && c2.GetLength() > 0) {
+                c2.switchOcupado();
+                Cliente caux = c2.getClienteActual();
+                caux.GuardarTiempoSalida(ticks);
+                ClientesSalida.push_back(caux);
+                c2.SalirCola();
+
+                if(c2.GetLength() > 0) {
+                    c2.setClienteActual(c2.getPrimero());
+                    c2.setTiempoRestante((rand() % 5) + offset);
+                }
+
+            }
+        }
+            //El cajero no esta ocupado
+        else if(!c2.GetOcupado() && c2.GetLength() > 0){
+            c2.setClienteActual(c2.getPrimero());
+            c2.setTiempoRestante((rand() % 5) + offset);
+            c2.switchOcupado();
+        }
+        c2.restarTiempoRestante();
+        //Cola 3
+        if(c3.GetOcupado()){
+            if(c3.getTiempoRestante() == 0 && c3.GetLength() > 0) {
+
+                c3.switchOcupado();
+                Cliente caux = c3.getClienteActual();
+                caux.GuardarTiempoSalida(ticks);
+                ClientesSalida.push_back(caux);
+                c3.SalirCola();
+                if(c3.GetLength() > 0) {
+                    c3.setClienteActual(c3.getPrimero());
+                    c3.setTiempoRestante((rand() % 5) + offset);
+                }
+
+            }
+        }
+            //El cajero no esta ocupado
+        else if(!c3.GetOcupado() && c3.GetLength() > 0){
+            c3.setClienteActual(c3.getPrimero());
+            c3.setTiempoRestante((rand() % 5) + offset);
+            c3.switchOcupado();
+        }
+        c3.restarTiempoRestante();
+
+        ticks++;
+    }
+    cout << "while finalizado" << endl;
+    for (int i = 0; i < ClientesSalida.size(); ++i){
+        cout << ClientesSalida[i].GetTiempoSalida() << endl;
     }
 
 }
