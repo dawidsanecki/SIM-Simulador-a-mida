@@ -85,6 +85,7 @@ public:
 };
 
 int CompararColas(Cajero &c1, Cajero &c2, Cajero &c3){
+    cout << "im here" << endl;
     int cl1 = c1.GetLength();
     int cl2 = c2.GetLength();
     int cl3 = c3.GetLength();
@@ -164,6 +165,7 @@ void SimulationWithoutChange(int IntervalLLegada, int SeedCajero1, int SeedCajer
                 Cliente caux = c1.getClienteActual();
                 caux.GuardarTiempoSalida(ticks);
                 ClientesSalida.push_back(caux);
+
                 c1.SalirCola();
 
                 if(c1.GetLength() > 0) {
@@ -180,6 +182,7 @@ void SimulationWithoutChange(int IntervalLLegada, int SeedCajero1, int SeedCajer
             c1.switchOcupado();
         }
         c1.restarTiempoRestante();
+
         //Cola 2
         if(c2.GetOcupado()){
             if(c2.getTiempoRestante() == 0 && c2.GetLength() > 0) {
@@ -187,7 +190,8 @@ void SimulationWithoutChange(int IntervalLLegada, int SeedCajero1, int SeedCajer
                 Cliente caux = c2.getClienteActual();
                 caux.GuardarTiempoSalida(ticks);
                 ClientesSalida.push_back(caux);
-                c1.SalirCola();
+                c2.SalirCola();
+
                 if(c2.GetLength() > 0) {
                     c2.setClienteActual(c2.getPrimero());
                     c2.setTiempoRestante((rand() % 5) + offset);
@@ -202,7 +206,6 @@ void SimulationWithoutChange(int IntervalLLegada, int SeedCajero1, int SeedCajer
             c2.switchOcupado();
         }
         c2.restarTiempoRestante();
-
         //Cola 3
         if(c3.GetOcupado()){
             if(c3.getTiempoRestante() == 0 && c3.GetLength() > 0) {
@@ -211,7 +214,7 @@ void SimulationWithoutChange(int IntervalLLegada, int SeedCajero1, int SeedCajer
                 Cliente caux = c3.getClienteActual();
                 caux.GuardarTiempoSalida(ticks);
                 ClientesSalida.push_back(caux);
-                c1.SalirCola();
+                c3.SalirCola();
                 if(c3.GetLength() > 0) {
                     c3.setClienteActual(c3.getPrimero());
                     c3.setTiempoRestante((rand() % 5) + offset);
@@ -252,7 +255,7 @@ void ScenarioExecute(){
     cout << "Escoge uno de los 2 escenarios" << endl << "1.3 cajeros con colas individuales" << endl << "2.3 cajeros con colas individuales pero los clientes pueden cambiar de cola despues de estar 15 minutos en una" << endl;
     cin >> escenario;
     if(escenario == 1){
-        SimulationWithoutChange(3,5234,234234,25332);
+        SimulationWithoutChange(4,5234,234234,25332);
     }
     else if(escenario == 2){
         SimulationWithChange(8,15,0.15,23423,9035,8394);
@@ -263,6 +266,7 @@ void DataImport(){
     cout << "Introduce los siguientes datos para tu simulación" << endl;
     cout << "Quieres que los clientes puedan cambiar de cola despues de un tiempo?" << endl << "[y/n]" << endl;
     string ans;
+    cin >> ans;
     if(ans == "y"){
         cout << "Cuantos minutos quieres que los clientes se esperan antes de cambiar de cola?" << endl;
         int TiempoCambio;
