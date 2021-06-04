@@ -140,8 +140,10 @@ int CompararColas(Cajero &c1, Cajero &c2, Cajero &c3,int offset){
 
 }
 
-void SimulationWithoutChange(int IntervalLLegada, int SeedCajero1, int SeedCajero2, int SeedCajero3){
 
+
+void SimulationWithoutChange(int IntervalLLegada, int Seed){
+    srand(Seed);
     int ticks = 0; //Ticks son nuestro metodo de medir el tiempo, cada tick representa un minuto
     vector<Cliente> ClientesSalida; //Clientes que salen de la simulacion
     Cajero c1;
@@ -252,8 +254,8 @@ void SimulationWithoutChange(int IntervalLLegada, int SeedCajero1, int SeedCajer
 
 }
 
-void SimulationWithChange(int IntervalLLegada,int MinutosHastaCambio, double ProbabilidadDeCambio, int SeedCajero1, int SeedCajero2, int SeedCajero3){
-
+void SimulationWithChange(int IntervalLLegada,int MinutosHastaCambio, double ProbabilidadDeCambio, int Seed){
+    srand(Seed);
     int ticks = 0; //Ticks son nuestro metodo de medir el tiempo, cada tick representa un minuto
     vector<Cliente> ClientesSalida; //Clientes que salen de la simulacion
     Cajero c1;
@@ -456,8 +458,8 @@ void SimulationWithChange(int IntervalLLegada,int MinutosHastaCambio, double Pro
 
 }
 
-void SimulationWithChangeAndRandomChoice(int IntervalLLegada,int MinutosHastaCambio, double ProbabilidadDeCambio, int SeedCajero1, int SeedCajero2, int SeedCajero3){
-
+void SimulationWithChangeAndRandomChoice(int IntervalLLegada,int MinutosHastaCambio, double ProbabilidadDeCambio, int Seed){
+    srand(Seed);
     int ticks = 0; //Ticks son nuestro metodo de medir el tiempo, cada tick representa un minuto
     vector<Cliente> ClientesSalida; //Clientes que salen de la simulacion
     Cajero c1;
@@ -663,17 +665,20 @@ void SimulationWithChangeAndRandomChoice(int IntervalLLegada,int MinutosHastaCam
 void ScenarioExecute(){
     int escenario;
     cout << "Escoge uno de los 2 escenarios" << endl << "1.3 cajeros con colas individuales" << endl << "2.3 cajeros con colas individuales pero los clientes pueden cambiar de cola despues de estar 15 minutos en una" << endl;
+    cout << "3.Los clientes se cambian de fila pero escogen el cajero aleatoriamente al inicio" << endl;
+
     cin >> escenario;
     if(escenario == 1){
-        SimulationWithoutChange(4,5234,234234,25332);
+        SimulationWithoutChange(4,123456);
     }
     else if(escenario == 2){
-        SimulationWithChange(4,15,0.15,23423,9035,8394);
+        SimulationWithChange(4,15,0.15,123421111);
     }
 
     else if(escenario == 3){
-        SimulationWithChangeAndRandomChoice(4,15,0.15,23423,9035,8394);
+        SimulationWithChangeAndRandomChoice(4,15,0.15,696969);
     }
+
 }
 
 void DataImport(){
@@ -691,33 +696,20 @@ void DataImport(){
         cout << "Cada cuantos minutos llega una persona" << endl;
         int IntervalLlegada;
         cin >> IntervalLlegada;
-        cout << "Indica un seed para el cajero 1 (numero entero)" << endl;
-        int s1;
-        cin >> s1;
-        cout << "Indica un seed para el cajero 2 (numero entero)" << endl;
-        int s2;
-        cin >> s2;
-        cout << "Indica un seed para el cajero 3 (numero entero)" << endl;
-        int s3;
-        cin >> s3;
-        SimulationWithChange( IntervalLlegada,TiempoCambio, ProbabilidadCambio,s1,s2,s3);
+        cout << "Indica un seed para la simulación" << endl;
+        int s;
+        cin >> s;
+
+        SimulationWithChange( IntervalLlegada,TiempoCambio, ProbabilidadCambio,s);
     }
     else if(ans == "n"){
         cout << "Cada cuantos minutos llega una persona" << endl;
         int IntervalLlegada;
         cin >> IntervalLlegada;
-        cout << "Indica un seed para el cajero 1 (numero entero)" << endl;
-        int s1;
-        cin >> s1;
-        cout << "Indica un seed para el cajero 2 (numero entero)" << endl;
-        int s2;
-        cin >> s2;
-        cout << "Indica un seed para el cajero 3 (numero entero)" << endl;
-        int s3;
-        cin >> s3;
-
-
-        SimulationWithoutChange(IntervalLlegada,s1,s2,s3);
+        cout << "Indica un seed para la simulación" << endl;
+        int s;
+        cin >> s;
+        SimulationWithoutChange(IntervalLlegada,s);
     }
 }
 
