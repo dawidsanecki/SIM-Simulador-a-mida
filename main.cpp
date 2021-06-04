@@ -6,10 +6,10 @@ using namespace std;
 
 //Clase cliente
 class Cliente {
-    int TiempoEntrada;
+
     int TiempoSalida;
 public:
-
+    int TiempoEntrada;
     void SetTiempoEntrada(int ticks){
         TiempoEntrada = ticks;
     }
@@ -64,7 +64,9 @@ public:
     }
 
     void SalirCola(){
+        cout << cola.size() << endl;
         cola.erase(cola.begin());
+
     }
 
     Cliente getPrimero(){
@@ -131,7 +133,8 @@ void SimulationWithoutChange(int IntervalLLegada, int SeedCajero1, int SeedCajer
     Cajero c1;
     Cajero c2;
     Cajero c3;
-    int offset = 20;
+    int offset = 8;
+    cout << "entrada while" << endl;
     while(ticks < 60){
         //Entrada nuevo cliente cada intervalo
         if(ticks % IntervalLLegada == 0){
@@ -156,12 +159,13 @@ void SimulationWithoutChange(int IntervalLLegada, int SeedCajero1, int SeedCajer
         //Cola 1
         //Si el cajero esta ocupado restamos el tiempo restante
         if(c1.GetOcupado()){
-            if(c1.getTiempoRestante() == 0) {
+            if(c1.getTiempoRestante() == 0 && c1.GetLength() > 0) {
                 c1.switchOcupado();
                 Cliente caux = c1.getClienteActual();
                 caux.GuardarTiempoSalida(ticks);
                 ClientesSalida.push_back(caux);
                 c1.SalirCola();
+
                 if(c1.GetLength() > 0) {
                     c1.setClienteActual(c1.getPrimero());
                     c1.setTiempoRestante((rand() % 5) + offset);
@@ -172,14 +176,13 @@ void SimulationWithoutChange(int IntervalLLegada, int SeedCajero1, int SeedCajer
         //El cajero no esta ocupado
         else if(!c1.GetOcupado() && c1.GetLength() > 0){
             c1.setClienteActual(c1.getPrimero());
-            c1.setTiempoRestante((rand() % 5) + offset);
+            c1.setTiempoRestante((rand() % 5) + 1);
             c1.switchOcupado();
         }
         c1.restarTiempoRestante();
-
         //Cola 2
         if(c2.GetOcupado()){
-            if(c2.getTiempoRestante() == 0) {
+            if(c2.getTiempoRestante() == 0 && c2.GetLength() > 0) {
                 c2.switchOcupado();
                 Cliente caux = c2.getClienteActual();
                 caux.GuardarTiempoSalida(ticks);
@@ -202,7 +205,8 @@ void SimulationWithoutChange(int IntervalLLegada, int SeedCajero1, int SeedCajer
 
         //Cola 3
         if(c3.GetOcupado()){
-            if(c3.getTiempoRestante() == 0) {
+            if(c3.getTiempoRestante() == 0 && c3.GetLength() > 0) {
+
                 c3.switchOcupado();
                 Cliente caux = c3.getClienteActual();
                 caux.GuardarTiempoSalida(ticks);
@@ -225,7 +229,7 @@ void SimulationWithoutChange(int IntervalLLegada, int SeedCajero1, int SeedCajer
 
         ticks++;
     }
-
+    cout << "while finalizado" << endl;
     for (int i = 0; i < ClientesSalida.size(); ++i){
         cout << ClientesSalida[i].GetTiempoSalida() << endl;
     }
