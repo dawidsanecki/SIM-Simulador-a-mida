@@ -55,6 +55,10 @@ public:
         return actual;
     }
 
+    Cliente getClienteI(int i){
+        return cola[i];
+    }
+
     void restarTiempoRestante(){
         --TiempoRestante;
     }
@@ -89,26 +93,35 @@ int CompararColas(Cajero &c1, Cajero &c2, Cajero &c3,int offset){
     int cl1 = c1.GetLength();
     int cl2 = c2.GetLength();
     int cl3 = c3.GetLength();
-    cout << cl1 << " " << cl2 << " " << cl3 << endl;
+    cout << cl1 << " " << cl2 << " " << cl3 << " " << offset << endl;
     //3 colas iguales
-    if(cl1-offset == cl2 and cl2 == cl3){
+
+    if(cl1-offset == cl2 and cl2 == cl3 and offset == 0){
         int numr = rand() % 3;
         if(numr == 0) return 1;
         else if(numr == 1) return 2;
         else return 3;
     }
     //2 colas iguales
-    else if(cl1-offset == cl2 && cl1-offset < cl3){
+    else if(cl1-offset == cl2 && cl1-offset < cl3 and offset == 0){
         int numr = rand() % 2;
         if(numr == 0) return 1;
         else return 2;
     }
+
+    else if(cl1-offset == cl2 && cl1-offset < cl3 and offset != 0){
+        return 1;
+    }
     else if(cl1-offset == cl2 && cl1-offset > cl3) return 3;
 
-    else if(cl1-offset == cl3 && cl1-offset < cl2){
+    else if(cl1-offset == cl3 && cl1-offset < cl2 and offset == 0){
         int numr = rand() % 2;
         if(numr == 0) return 1;
         else return 3;
+    }
+
+    else if(cl1-offset == cl3 && cl1-offset < cl2 and offset != 0){
+        return 1;
     }
     else if(cl1-offset == cl3 && cl1-offset > cl2) return 2;
 
@@ -246,9 +259,101 @@ void SimulationWithChange(int IntervalLLegada,int MinutosHastaCambio, double Pro
     Cajero c1;
     Cajero c2;
     Cajero c3;
-    int offset = 8;
+    int offset = 30;
+    int offset2 = 20;
     cout << "entrada while" << endl;
-    while(ticks < 60){
+    while(ticks < 180){
+
+        //Mirar el resto de la cua
+        //Cola 1
+
+        bool NoCambio = false;
+        if(c1.GetLength() > 1){ //ignoro el primero que ya debe estar atendido
+            vector<bool> clientesCambiar;
+            for(int i = 1; i < c1.GetLength();++i ){ //empezamos por el final que deben salir primeros
+                Cliente aux = c1.getClienteI(i);
+                if(aux.WantsChange(ticks,IntervalLLegada)) clientesCambiar.push_back(true);
+                else clientesCambiar.push_back(false);
+            }
+            for(int i = c1.GetLength()-1; i > 0 and !NoCambio;--i){
+                if(clientesCambiar[i] and rand() % 100 <= ProbabilidadDeCambio*100){ //si quiere cambiarse
+                    cout << "Quiero cambiarme de la cola 1" << endl;
+                    int colaD = CompararColas(c1,c2,c3,c1.GetLength()-i);
+                    cout << colaD << endl;
+                    if(colaD == 1) NoCambio = true;
+                    if(colaD != 1){
+                        if(colaD == 2){
+                            cout << "Me cambio a cola 2" << endl;
+                            c1.CambiarCola(c2,i);
+                        }
+                        else if(colaD == 3){
+                            cout << "Me cambio a cola 3" << endl;
+                            c1.CambiarCola(c3,i);
+                        }
+                    }
+                }
+            }
+        }
+
+        //Mirar el resto de la cua
+        //Cola 2
+        NoCambio = false;
+        if(c2.GetLength() > 1){ //ignoro el primero que ya debe estar atendido
+            vector<bool> clientesCambiar;
+            for(int i = 1; i < c2.GetLength();++i ){ //empezamos por el final que deben salir primeros
+                Cliente aux = c2.getClienteI(i);
+                if(aux.WantsChange(ticks,IntervalLLegada)) clientesCambiar.push_back(true);
+                else clientesCambiar.push_back(false);
+            }
+            for(int i = c2.GetLength()-1; i > 0 and !NoCambio;--i){
+                if(clientesCambiar[i] and rand() % 100 <= ProbabilidadDeCambio*100){ //si quiere cambiarse
+                    cout << "Quiero cambiarme de la cola 2" << endl;
+                    int colaD = CompararColas(c2,c1,c3,c2.GetLength()-i);
+                    cout << colaD << endl;
+                    if(colaD == 1) NoCambio = true;
+                    if(colaD != 1){
+                        if(colaD == 2){
+                            cout << "Me cambio a cola 1" << endl;
+                            c2.CambiarCola(c1,i);
+                        }
+                        else if(colaD == 3){
+                            cout << "Me cambio a cola 3" << endl;
+                            c2.CambiarCola(c3,i);
+                        }
+                    }
+                }
+            }
+        }
+
+        //Mirar el resto de la cua
+        //Cola 3
+        NoCambio = false;
+        if(c3.GetLength() > 1){ //ignoro el primero que ya debe estar atendido
+            vector<bool> clientesCambiar;
+            for(int i = 1; i < c3.GetLength();++i ){ //empezamos por el final que deben salir primeros
+                Cliente aux = c3.getClienteI(i);
+                if(aux.WantsChange(ticks,IntervalLLegada)) clientesCambiar.push_back(true);
+                else clientesCambiar.push_back(false);
+            }
+            for(int i = c3.GetLength()-1; i > 0 and !NoCambio;--i){
+                if(clientesCambiar[i] and rand() % 100 <= ProbabilidadDeCambio*100){ //si quiere cambiarse
+                    cout << "Quiero cambiarme de la cola 3" << endl;
+                    int colaD = CompararColas(c3,c2,c1,c3.GetLength()-i);
+                    cout << colaD << endl;
+                    if(colaD == 1) NoCambio = true;
+                    if(colaD != 1){
+                        if(colaD == 2){
+                            cout << "Me cambio a cola 2" << endl;
+                            c3.CambiarCola(c2,i);
+                        }
+                        else if(colaD == 3){
+                            cout << "Me cambio a cola 3" << endl;
+                            c3.CambiarCola(c1,i);
+                        }
+                    }
+                }
+            }
+        }
         //Entrada nuevo cliente cada intervalo
         if(ticks % IntervalLLegada == 0){
             Cliente c;
@@ -282,7 +387,7 @@ void SimulationWithChange(int IntervalLLegada,int MinutosHastaCambio, double Pro
 
                 if(c1.GetLength() > 0) {
                     c1.setClienteActual(c1.getPrimero());
-                    c1.setTiempoRestante((rand() % 5) + offset);
+                    c1.setTiempoRestante((rand() % 20) + offset);
                 }
 
             }
@@ -290,7 +395,7 @@ void SimulationWithChange(int IntervalLLegada,int MinutosHastaCambio, double Pro
             //El cajero no esta ocupado
         else if(!c1.GetOcupado() && c1.GetLength() > 0){
             c1.setClienteActual(c1.getPrimero());
-            c1.setTiempoRestante((rand() % 5) + 1);
+            c1.setTiempoRestante((rand() % 20) + offset);
             c1.switchOcupado();
         }
         c1.restarTiempoRestante();
@@ -306,7 +411,7 @@ void SimulationWithChange(int IntervalLLegada,int MinutosHastaCambio, double Pro
 
                 if(c2.GetLength() > 0) {
                     c2.setClienteActual(c2.getPrimero());
-                    c2.setTiempoRestante((rand() % 5) + offset);
+                    c2.setTiempoRestante((rand() % 20 + offset));
                 }
 
             }
@@ -314,7 +419,7 @@ void SimulationWithChange(int IntervalLLegada,int MinutosHastaCambio, double Pro
             //El cajero no esta ocupado
         else if(!c2.GetOcupado() && c2.GetLength() > 0){
             c2.setClienteActual(c2.getPrimero());
-            c2.setTiempoRestante((rand() % 5) + offset);
+            c2.setTiempoRestante((rand() % 20) + offset);
             c2.switchOcupado();
         }
         c2.restarTiempoRestante();
@@ -329,7 +434,7 @@ void SimulationWithChange(int IntervalLLegada,int MinutosHastaCambio, double Pro
                 c3.SalirCola();
                 if(c3.GetLength() > 0) {
                     c3.setClienteActual(c3.getPrimero());
-                    c3.setTiempoRestante((rand() % 5) + offset);
+                    c3.setTiempoRestante((rand() % 20) + offset);
                 }
 
             }
@@ -337,7 +442,211 @@ void SimulationWithChange(int IntervalLLegada,int MinutosHastaCambio, double Pro
             //El cajero no esta ocupado
         else if(!c3.GetOcupado() && c3.GetLength() > 0){
             c3.setClienteActual(c3.getPrimero());
-            c3.setTiempoRestante((rand() % 5) + offset);
+            c3.setTiempoRestante((rand() % 20) + offset);
+            c3.switchOcupado();
+        }
+        c3.restarTiempoRestante();
+
+        ticks++;
+    }
+    cout << "while finalizado" << endl;
+    for (int i = 0; i < ClientesSalida.size(); ++i){
+        cout << ClientesSalida[i].GetTiempoSalida() << endl;
+    }
+
+}
+
+void SimulationWithChangeAndRandomChoice(int IntervalLLegada,int MinutosHastaCambio, double ProbabilidadDeCambio, int SeedCajero1, int SeedCajero2, int SeedCajero3){
+
+    int ticks = 0; //Ticks son nuestro metodo de medir el tiempo, cada tick representa un minuto
+    vector<Cliente> ClientesSalida; //Clientes que salen de la simulacion
+    Cajero c1;
+    Cajero c2;
+    Cajero c3;
+    int offset = 50;
+    int offset2 = 20;
+    cout << "entrada while" << endl;
+    while(ticks < 180){
+
+        //Mirar el resto de la cua
+        //Cola 1
+
+        bool NoCambio = false;
+        if(c1.GetLength() > 1){ //ignoro el primero que ya debe estar atendido
+            vector<bool> clientesCambiar;
+            for(int i = 1; i < c1.GetLength();++i ){ //empezamos por el final que deben salir primeros
+                Cliente aux = c1.getClienteI(i);
+                if(aux.WantsChange(ticks,IntervalLLegada)) clientesCambiar.push_back(true);
+                else clientesCambiar.push_back(false);
+            }
+            for(int i = c1.GetLength()-1; i > 0 and !NoCambio;--i){
+                if(clientesCambiar[i] and rand() % 100 <= ProbabilidadDeCambio*100){ //si quiere cambiarse
+                    cout << "Quiero cambiarme de la cola 1" << endl;
+                    int colaD = CompararColas(c1,c2,c3,c1.GetLength()-i);
+                    cout << colaD << endl;
+                    if(colaD == 1) NoCambio = true;
+                    if(colaD != 1){
+                        if(colaD == 2){
+                            cout << "Me cambio a cola 2" << endl;
+                            c1.CambiarCola(c2,i);
+                        }
+                        else if(colaD == 3){
+                            cout << "Me cambio a cola 3" << endl;
+                            c1.CambiarCola(c3,i);
+                        }
+                    }
+                }
+            }
+        }
+
+        //Mirar el resto de la cua
+        //Cola 2
+        NoCambio = false;
+        if(c2.GetLength() > 1){ //ignoro el primero que ya debe estar atendido
+            vector<bool> clientesCambiar;
+            for(int i = 1; i < c2.GetLength();++i ){ //empezamos por el final que deben salir primeros
+                Cliente aux = c2.getClienteI(i);
+                if(aux.WantsChange(ticks,IntervalLLegada)) clientesCambiar.push_back(true);
+                else clientesCambiar.push_back(false);
+            }
+            for(int i = c2.GetLength()-1; i > 0 and !NoCambio;--i){
+                if(clientesCambiar[i] and rand() % 100 <= ProbabilidadDeCambio*100){ //si quiere cambiarse
+                    cout << "Quiero cambiarme de la cola 2" << endl;
+                    int colaD = CompararColas(c2,c1,c3,c2.GetLength()-i);
+                    cout << colaD << endl;
+                    if(colaD == 1) NoCambio = true;
+                    if(colaD != 1){
+                        if(colaD == 2){
+                            cout << "Me cambio a cola 1" << endl;
+                            c2.CambiarCola(c1,i);
+                        }
+                        else if(colaD == 3){
+                            cout << "Me cambio a cola 3" << endl;
+                            c2.CambiarCola(c3,i);
+                        }
+                    }
+                }
+            }
+        }
+
+        //Mirar el resto de la cua
+        //Cola 3
+        NoCambio = false;
+        if(c3.GetLength() > 1){ //ignoro el primero que ya debe estar atendido
+            vector<bool> clientesCambiar;
+            for(int i = 1; i < c3.GetLength();++i ){ //empezamos por el final que deben salir primeros
+                Cliente aux = c3.getClienteI(i);
+                if(aux.WantsChange(ticks,IntervalLLegada)) clientesCambiar.push_back(true);
+                else clientesCambiar.push_back(false);
+            }
+            for(int i = c3.GetLength()-1; i > 0 and !NoCambio;--i){
+                if(clientesCambiar[i] and rand() % 100 <= ProbabilidadDeCambio*100){ //si quiere cambiarse
+                    cout << "Quiero cambiarme de la cola 3" << endl;
+                    int colaD = CompararColas(c3,c2,c1,c3.GetLength()-i-1);
+                    cout << colaD << endl;
+                    if(colaD == 1) NoCambio = true;
+                    if(colaD != 1){
+                        if(colaD == 2){
+                            cout << "Me cambio a cola 2" << endl;
+                            c3.CambiarCola(c2,i);
+                        }
+                        else if(colaD == 3){
+                            cout << "Me cambio a cola 3" << endl;
+                            c3.CambiarCola(c1,i);
+                        }
+                    }
+                }
+            }
+        }
+        //Entrada nuevo cliente cada intervalo
+        if(ticks % IntervalLLegada == 0){
+            Cliente c;
+            c.SetTiempoEntrada(ticks);
+            int colaD = rand() % 3 + 1;
+            if(colaD == 1){
+                c1.EntrarCola(c);
+                cout << "entrado a 1" << endl;
+            }
+            if(colaD == 2) {
+                c2.EntrarCola(c);
+                cout << "entrado a 2" << endl;
+            }
+            if(colaD == 3) {
+                c3.EntrarCola(c);
+                cout << "entrado a 3" << endl;
+            }
+
+        }
+        //Scan colas
+        //Cola 1
+        //Si el cajero esta ocupado restamos el tiempo restante
+        if(c1.GetOcupado()){
+            if(c1.getTiempoRestante() == 0 && c1.GetLength() > 0) {
+                c1.switchOcupado();
+                Cliente caux = c1.getClienteActual();
+                caux.GuardarTiempoSalida(ticks);
+                ClientesSalida.push_back(caux);
+
+                c1.SalirCola();
+
+                if(c1.GetLength() > 0) {
+                    c1.setClienteActual(c1.getPrimero());
+                    c1.setTiempoRestante((rand() % 20) + offset);
+                }
+
+            }
+        }
+            //El cajero no esta ocupado
+        else if(!c1.GetOcupado() && c1.GetLength() > 0){
+            c1.setClienteActual(c1.getPrimero());
+            c1.setTiempoRestante((rand() % 20) + offset);
+            c1.switchOcupado();
+        }
+        c1.restarTiempoRestante();
+
+        //Cola 2
+        if(c2.GetOcupado()){
+            if(c2.getTiempoRestante() == 0 && c2.GetLength() > 0) {
+                c2.switchOcupado();
+                Cliente caux = c2.getClienteActual();
+                caux.GuardarTiempoSalida(ticks);
+                ClientesSalida.push_back(caux);
+                c2.SalirCola();
+
+                if(c2.GetLength() > 0) {
+                    c2.setClienteActual(c2.getPrimero());
+                    c2.setTiempoRestante((rand() % 20 + offset));
+                }
+
+            }
+        }
+            //El cajero no esta ocupado
+        else if(!c2.GetOcupado() && c2.GetLength() > 0){
+            c2.setClienteActual(c2.getPrimero());
+            c2.setTiempoRestante((rand() % 20) + offset);
+            c2.switchOcupado();
+        }
+        c2.restarTiempoRestante();
+        //Cola 3
+        if(c3.GetOcupado()){
+            if(c3.getTiempoRestante() == 0 && c3.GetLength() > 0) {
+
+                c3.switchOcupado();
+                Cliente caux = c3.getClienteActual();
+                caux.GuardarTiempoSalida(ticks);
+                ClientesSalida.push_back(caux);
+                c3.SalirCola();
+                if(c3.GetLength() > 0) {
+                    c3.setClienteActual(c3.getPrimero());
+                    c3.setTiempoRestante((rand() % 20) + offset);
+                }
+
+            }
+        }
+            //El cajero no esta ocupado
+        else if(!c3.GetOcupado() && c3.GetLength() > 0){
+            c3.setClienteActual(c3.getPrimero());
+            c3.setTiempoRestante((rand() % 20) + offset);
             c3.switchOcupado();
         }
         c3.restarTiempoRestante();
@@ -359,7 +668,11 @@ void ScenarioExecute(){
         SimulationWithoutChange(4,5234,234234,25332);
     }
     else if(escenario == 2){
-        SimulationWithChange(8,15,0.15,23423,9035,8394);
+        SimulationWithChange(4,15,0.15,23423,9035,8394);
+    }
+
+    else if(escenario == 3){
+        SimulationWithChangeAndRandomChoice(4,15,0.15,23423,9035,8394);
     }
 }
 
