@@ -1,5 +1,8 @@
 #include "iostream"
 #include "vector"
+#include <iterator>
+#include <random>
+
 #include "list"
 using namespace std;
 
@@ -89,7 +92,6 @@ public:
 };
 //Si offset es igual a 0 es el caso de que se escoge la cola sin estar en una, si offset es diferente se hace el caso de cambiar de cola
 int CompararColas(Cajero &c1, Cajero &c2, Cajero &c3,int offset){
-    cout << "im here" << endl;
     int cl1 = c1.GetLength();
     int cl2 = c2.GetLength();
     int cl3 = c3.GetLength();
@@ -102,7 +104,7 @@ int CompararColas(Cajero &c1, Cajero &c2, Cajero &c3,int offset){
         else if(numr == 1) return 2;
         else return 3;
     }
-    //2 colas iguales
+        //2 colas iguales
     else if(cl1-offset == cl2 && cl1-offset < cl3 and offset == 0){
         int numr = rand() % 2;
         if(numr == 0) return 1;
@@ -132,7 +134,7 @@ int CompararColas(Cajero &c1, Cajero &c2, Cajero &c3,int offset){
     }
     else if(cl2 == cl3 && cl1-offset < cl2) return 1;
 
-    //3 cola diferentes
+        //3 cola diferentes
     else if(cl1-offset < cl2 && cl1-offset < cl3) return 1;
     else if(cl2 < cl3 && cl2 < cl1-offset) return 2;
     else if(cl3 < cl1-offset && cl3 < cl2) return 3;
@@ -140,34 +142,64 @@ int CompararColas(Cajero &c1, Cajero &c2, Cajero &c3,int offset){
 
 }
 
+vector<bool> ArrivalTime(int IntervalLlegada,int Seed,int ticks_max){
+    random_device rd;
+
+    mt19937 randomN (Seed);
+    double lamda = 1 / double(IntervalLlegada);
+    exponential_distribution<double> exp (lamda);
+
+    int sumTimes=0;
+    double newTime;
+    vector<bool> ArrivalInterval(ticks_max,false);
+    bool primera_vez = true;
+
+    for(int i = 0; sumTimes < ticks_max; ++i){
+
+        if(!primera_vez){
+            ArrivalInterval[sumTimes] = true;
+        }
+
+        newTime = exp.operator() (randomN); //Genera el siguiente numero de la distribución
+        int IntTime = newTime;
+
+        sumTimes = sumTimes + IntTime;
+        primera_vez = false;
+    }
 
 
-void SimulationWithoutChange(int IntervalLLegada, int Seed){
+
+    return ArrivalInterval;
+}
+
+void SimulationWithoutChange(int IntervalLLegada, int Seed,int tick_max, double AverageServiceTime){
     srand(Seed);
+    vector<bool> Arrival = ArrivalTime(IntervalLLegada,Seed,tick_max);
     int ticks = 0; //Ticks son nuestro metodo de medir el tiempo, cada tick representa un minuto
     vector<Cliente> ClientesSalida; //Clientes que salen de la simulacion
     Cajero c1;
     Cajero c2;
     Cajero c3;
+    mt19937 randomN (Seed);
+    double lamda = 1/AverageServiceTime;
+    exponential_distribution<double> exp (lamda);
+
+
     int offset = 8;
-    cout << "entrada while" << endl;
-    while(ticks < 60){
+    while(ticks < tick_max){
         //Entrada nuevo cliente cada intervalo
-        if(ticks % IntervalLLegada == 0){
+        if(Arrival[ticks]){
             Cliente c;
             c.SetTiempoEntrada(ticks);
             int colaD = CompararColas(c1,c2,c3,0);
             if(colaD == 1){
                 c1.EntrarCola(c);
-                cout << "entrado a 1" << endl;
             }
             if(colaD == 2) {
                 c2.EntrarCola(c);
-                cout << "entrado a 2" << endl;
             }
             if(colaD == 3) {
                 c3.EntrarCola(c);
-                cout << "entrado a 3" << endl;
             }
 
         }
@@ -185,15 +217,15 @@ void SimulationWithoutChange(int IntervalLLegada, int Seed){
 
                 if(c1.GetLength() > 0) {
                     c1.setClienteActual(c1.getPrimero());
-                    c1.setTiempoRestante((rand() % 5) + offset);
+                    c1.setTiempoRestante((int(exp.operator() (randomN)))+1);
                 }
 
             }
         }
-        //El cajero no esta ocupado
+            //El cajero no esta ocupado
         else if(!c1.GetOcupado() && c1.GetLength() > 0){
             c1.setClienteActual(c1.getPrimero());
-            c1.setTiempoRestante((rand() % 5) + 1);
+            c1.setTiempoRestante((int(exp.operator() (randomN)))+1);
             c1.switchOcupado();
         }
         c1.restarTiempoRestante();
@@ -209,7 +241,7 @@ void SimulationWithoutChange(int IntervalLLegada, int Seed){
 
                 if(c2.GetLength() > 0) {
                     c2.setClienteActual(c2.getPrimero());
-                    c2.setTiempoRestante((rand() % 5) + offset);
+                    c2.setTiempoRestante((int(exp.operator() (randomN)))+1);
                 }
 
             }
@@ -217,7 +249,7 @@ void SimulationWithoutChange(int IntervalLLegada, int Seed){
             //El cajero no esta ocupado
         else if(!c2.GetOcupado() && c2.GetLength() > 0){
             c2.setClienteActual(c2.getPrimero());
-            c2.setTiempoRestante((rand() % 5) + offset);
+            c2.setTiempoRestante((int(exp.operator() (randomN)))+1);
             c2.switchOcupado();
         }
         c2.restarTiempoRestante();
@@ -232,7 +264,7 @@ void SimulationWithoutChange(int IntervalLLegada, int Seed){
                 c3.SalirCola();
                 if(c3.GetLength() > 0) {
                     c3.setClienteActual(c3.getPrimero());
-                    c3.setTiempoRestante((rand() % 5) + offset);
+                    c3.setTiempoRestante((int(exp.operator() (randomN)))+1);
                 }
 
             }
@@ -240,21 +272,20 @@ void SimulationWithoutChange(int IntervalLLegada, int Seed){
             //El cajero no esta ocupado
         else if(!c3.GetOcupado() && c3.GetLength() > 0){
             c3.setClienteActual(c3.getPrimero());
-            c3.setTiempoRestante((rand() % 5) + offset);
+            c3.setTiempoRestante((int(exp.operator() (randomN)))+1);
             c3.switchOcupado();
         }
         c3.restarTiempoRestante();
 
         ticks++;
     }
-    cout << "while finalizado" << endl;
     for (int i = 0; i < ClientesSalida.size(); ++i){
         cout << ClientesSalida[i].GetTiempoSalida() << endl;
     }
 
 }
 
-void SimulationWithChange(int IntervalLLegada,int MinutosHastaCambio, double ProbabilidadDeCambio, int Seed){
+void SimulationWithChange(int IntervalLLegada,int MinutosHastaCambio, double ProbabilidadDeCambio, int Seed,int tick_max, double AverageServiceTime){
     srand(Seed);
     int ticks = 0; //Ticks son nuestro metodo de medir el tiempo, cada tick representa un minuto
     vector<Cliente> ClientesSalida; //Clientes que salen de la simulacion
@@ -460,6 +491,7 @@ void SimulationWithChange(int IntervalLLegada,int MinutosHastaCambio, double Pro
 
 void SimulationWithChangeAndRandomChoice(int IntervalLLegada,int MinutosHastaCambio, double ProbabilidadDeCambio, int Seed){
     srand(Seed);
+    int cambios_de_cola = 0;
     int ticks = 0; //Ticks son nuestro metodo de medir el tiempo, cada tick representa un minuto
     vector<Cliente> ClientesSalida; //Clientes que salen de la simulacion
     Cajero c1;
@@ -491,17 +523,18 @@ void SimulationWithChangeAndRandomChoice(int IntervalLLegada,int MinutosHastaCam
                         if(colaD == 2){
                             cout << "Me cambio a cola 2" << endl;
                             c1.CambiarCola(c2,i);
+                            cambios_de_cola++;
                         }
                         else if(colaD == 3){
                             cout << "Me cambio a cola 3" << endl;
                             c1.CambiarCola(c3,i);
+                            cambios_de_cola++;
+
                         }
                     }
                 }
             }
         }
-
-        //Mirar el resto de la cua
         //Cola 2
         NoCambio = false;
         if(c2.GetLength() > 1){ //ignoro el primero que ya debe estar atendido
@@ -521,17 +554,19 @@ void SimulationWithChangeAndRandomChoice(int IntervalLLegada,int MinutosHastaCam
                         if(colaD == 2){
                             cout << "Me cambio a cola 1" << endl;
                             c2.CambiarCola(c1,i);
+                            cambios_de_cola++;
+
                         }
                         else if(colaD == 3){
                             cout << "Me cambio a cola 3" << endl;
                             c2.CambiarCola(c3,i);
+                            cambios_de_cola++;
+
                         }
                     }
                 }
             }
         }
-
-        //Mirar el resto de la cua
         //Cola 3
         NoCambio = false;
         if(c3.GetLength() > 1){ //ignoro el primero que ya debe estar atendido
@@ -551,10 +586,14 @@ void SimulationWithChangeAndRandomChoice(int IntervalLLegada,int MinutosHastaCam
                         if(colaD == 2){
                             cout << "Me cambio a cola 2" << endl;
                             c3.CambiarCola(c2,i);
+                            cambios_de_cola++;
+
                         }
                         else if(colaD == 3){
-                            cout << "Me cambio a cola 3" << endl;
+                            cout << "Me cambio a cola 1" << endl;
                             c3.CambiarCola(c1,i);
+                            cambios_de_cola++;
+
                         }
                     }
                 }
@@ -656,6 +695,7 @@ void SimulationWithChangeAndRandomChoice(int IntervalLLegada,int MinutosHastaCam
         ticks++;
     }
     cout << "while finalizado" << endl;
+    cout << "El numero de cambios de cola totales de esta ejecucion: "<< cambios_de_cola << endl;
     for (int i = 0; i < ClientesSalida.size(); ++i){
         cout << ClientesSalida[i].GetTiempoSalida() << endl;
     }
@@ -669,10 +709,10 @@ void ScenarioExecute(){
 
     cin >> escenario;
     if(escenario == 1){
-        SimulationWithoutChange(4,123456);
+        SimulationWithoutChange(3,123456,720,10);
     }
     else if(escenario == 2){
-        SimulationWithChange(4,15,0.15,123421111);
+        SimulationWithChange(4,15,0.95,123421111,720,10);
     }
 
     else if(escenario == 3){
@@ -709,7 +749,7 @@ void DataImport(){
         cout << "Indica un seed para la simulación" << endl;
         int s;
         cin >> s;
-        SimulationWithoutChange(IntervalLlegada,s);
+        SimulationWithoutChange(IntervalLlegada,s,720,10);
     }
 }
 
