@@ -88,7 +88,7 @@ vector<bool> ArrivalTime(int IntervalLlegada,int Seed,int ticks_max){
     return ArrivalInterval;
 }
 
-void SimulationWithoutChange(int IntervalLLegada, int Seed,int tick_max, double AverageServiceTime){
+void SimulationWithoutChange(int IntervalLLegada, int Seed,int tick_max, double AverageServiceTime,int fileid){
     srand(Seed);
     vector<bool> Arrival = ArrivalTime(IntervalLLegada,Seed,tick_max);
     int ticks = 0; //Ticks son nuestro metodo de medir el tiempo, cada tick representa un minuto
@@ -206,14 +206,15 @@ void SimulationWithoutChange(int IntervalLLegada, int Seed,int tick_max, double 
     }
 
     ofstream myfile;
-    myfile.open ("outNoChange.txt");
+    string filename = "outNoChange" + to_string(fileid) + ".txt";
+    myfile.open (filename);
     myfile << "tick - personas en la cola" << endl;
     for (int i = 0; i < tick_max;++i) myfile << nivelCola[i] << endl;
     myfile << "Media del tiempo pasado en la cola: " << sum/ClientesSalida.size() << endl;
     myfile.close();
 }
 
-void SimulationWithChange(int IntervalLLegada,int MinutosHastaCambio, int Seed,int tick_max, double AverageServiceTime){
+void SimulationWithChange(int IntervalLLegada,int MinutosHastaCambio, int Seed,int tick_max, double AverageServiceTime,int fileid){
     int ticks = 0; //Ticks son nuestro metodo de medir el tiempo, cada tick representa un minuto
     vector<int> nivelCola(tick_max,0);
     vector<Cliente> ClientesSalida; //Clientes que salen de la simulacion
@@ -403,13 +404,13 @@ void SimulationWithChange(int IntervalLLegada,int MinutosHastaCambio, int Seed,i
         ticks++;
     }
     ofstream myfile;
-    myfile.open ("outChange.txt");
+    string filename = "outChange" + to_string(fileid) + ".txt";
+    myfile.open (filename);
     int sum = 0;
     for (int i = 0; i < ClientesSalida.size(); ++i){
        sum+= ClientesSalida[i].GetTiempoSalida();
        //cout << "Cliente " << i << " ha tardado " << ClientesSalida[i].GetTiempoSalida() << endl;
     }
-
     myfile << "tick - personas en la cola" << endl;
     for (int i = 0; i < tick_max;++i) myfile << nivelCola[i] << endl;
     myfile << "Media del tiempo pasado en la cola: " << sum/ClientesSalida.size() << endl;
@@ -417,9 +418,7 @@ void SimulationWithChange(int IntervalLLegada,int MinutosHastaCambio, int Seed,i
     myfile.close();
 }
 
-
-
-void SimulationWithoutChangeRANDOM(int IntervalLLegada, int Seed,int tick_max, double AverageServiceTime){
+void SimulationWithoutChangeRANDOM(int IntervalLLegada, int Seed,int tick_max, double AverageServiceTime,int fileid){
     srand(Seed);
     vector<bool> Arrival = ArrivalTime(IntervalLLegada,Seed,tick_max);
     int ticks = 0; //Ticks son nuestro metodo de medir el tiempo, cada tick representa un minuto
@@ -537,14 +536,15 @@ void SimulationWithoutChangeRANDOM(int IntervalLLegada, int Seed,int tick_max, d
     }
 
     ofstream myfile;
-    myfile.open ("outNoChangeRANDOM.txt");
+    string filename = "outNoChangeRandom" + to_string(fileid) + ".txt";
+    myfile.open (filename);
     myfile << "tick - personas en la cola" << endl;
     for (int i = 0; i < tick_max;++i) myfile << nivelCola[i] << endl;
     myfile << "Media del tiempo pasado en la cola: " << sum/ClientesSalida.size() << endl;
     myfile.close();
 }
 
-void SimulationWithChangeRANDOM(int IntervalLLegada,int MinutosHastaCambio, int Seed,int tick_max, double AverageServiceTime){
+void SimulationWithChangeRANDOM(int IntervalLLegada,int MinutosHastaCambio, int Seed,int tick_max, double AverageServiceTime,int fileid){
     srand(Seed);
     int ticks = 0; //Ticks son nuestro metodo de medir el tiempo, cada tick representa un minuto
     vector<int> nivelCola(tick_max,0);
@@ -735,7 +735,8 @@ void SimulationWithChangeRANDOM(int IntervalLLegada,int MinutosHastaCambio, int 
         ticks++;
     }
     ofstream myfile;
-    myfile.open ("outChangeRANDOM.txt");
+    string filename = "outChangeRandom" + to_string(fileid) + ".txt";
+    myfile.open (filename);
     int sum = 0;
     for (int i = 0; i < ClientesSalida.size(); ++i){
         sum+= ClientesSalida[i].GetTiempoSalida();
@@ -750,25 +751,37 @@ void SimulationWithChangeRANDOM(int IntervalLLegada,int MinutosHastaCambio, int 
 }
 
 void ScenarioExecute(int escenario){
-    int IntervalLLegada = 8;
+    int IntervalLLegada = 5;
     int Seed = 39;
     int tick_max = 720;
-
+    int AvgServiceTime = 15;
     if(escenario == 1){
-        SimulationWithoutChange(IntervalLLegada,Seed,tick_max,15);
+        SimulationWithoutChange(IntervalLLegada,Seed,tick_max,AvgServiceTime,1);
     }
     else if(escenario == 2){
-        SimulationWithChange(IntervalLLegada,1,Seed,tick_max,15);
+        SimulationWithChange(IntervalLLegada,1,Seed,tick_max,AvgServiceTime,1);
     }
     else if(escenario == 4){
-        SimulationWithChangeRANDOM(IntervalLLegada,1,Seed,tick_max,15);
+        SimulationWithChangeRANDOM(IntervalLLegada,1,Seed,tick_max,AvgServiceTime,1);
     }
     else if(escenario == 3){
-        SimulationWithoutChangeRANDOM(IntervalLLegada,Seed,1000,15);
+        SimulationWithoutChangeRANDOM(IntervalLLegada,Seed,tick_max,AvgServiceTime,1);
     }
     else if(escenario == 5){
         for(int i = 1; i < 5;++i){
             ScenarioExecute(i);
+        }
+    }
+    else if(escenario == 6){
+        int numeroSim;
+        cout << "Cuantas pruebas quieres hacer de cada simulacion?" << endl;
+        cin >> numeroSim;
+        ++numeroSim;
+        for(int i = 1; i < numeroSim;++i){
+            SimulationWithoutChange(IntervalLLegada,i,tick_max,AvgServiceTime,i);
+            SimulationWithChange(IntervalLLegada,5,i,tick_max,AvgServiceTime,i);
+            SimulationWithChangeRANDOM(IntervalLLegada,5,i,tick_max,AvgServiceTime,i);
+            SimulationWithoutChangeRANDOM(IntervalLLegada,i,tick_max,AvgServiceTime,i);
         }
     }
 }
@@ -803,7 +816,7 @@ void DataImport(){
                 double avgstime;
                 cin >> avgstime;
 
-                SimulationWithChange(IntervalLlegada, TiempoCambio, s, tickmax, avgstime);
+                SimulationWithChange(IntervalLlegada, TiempoCambio, s, tickmax, avgstime,1);
             } else if (ans == "y") {
                 cout << "Quieres que los clientes escogan el cajero inicial aleatoriamente?" << endl << "[y/n]" << endl;
                 string ans;
@@ -825,7 +838,7 @@ void DataImport(){
                 double avgstime;
                 cin >> avgstime;
 
-                SimulationWithChangeRANDOM(IntervalLlegada, TiempoCambio, s, tickmax, avgstime);
+                SimulationWithChangeRANDOM(IntervalLlegada, TiempoCambio, s, tickmax, avgstime,1);
             }
         } else if (ans == "n") {
             cout << "Quieres que los clientes escogan el cajero inicial aleatoriamente?" << endl << "[y/n]" << endl;
@@ -843,7 +856,7 @@ void DataImport(){
                 cout << "Indica tiempo medio del servicio" << endl;
                 double avgstime;
                 cin >> avgstime;
-                SimulationWithoutChange(IntervalLlegada, s, tm, avgstime);
+                SimulationWithoutChange(IntervalLlegada, s, tm, avgstime,1);
             } else if (ans == "y") {
                 cout << "Cada cuantos minutos llega una persona" << endl;
                 int IntervalLlegada;
@@ -856,7 +869,7 @@ void DataImport(){
                 cout << "Indica tiempo medio del servicio" << endl;
                 double avgstime;
                 cin >> avgstime;
-                SimulationWithoutChangeRANDOM(IntervalLlegada, s, tm, avgstime);
+                SimulationWithoutChangeRANDOM(IntervalLlegada, s, tm, avgstime,1);
 
             }
         }
@@ -879,10 +892,10 @@ void DataImport(){
         double avgstime;
         cin >> avgstime;
 
-        SimulationWithChange(IntervalLlegada, TiempoCambio, s, tickmax, avgstime);
-        SimulationWithChangeRANDOM(IntervalLlegada, TiempoCambio, s, tickmax, avgstime);
-        SimulationWithoutChangeRANDOM(IntervalLlegada, s, tickmax, avgstime);
-        SimulationWithoutChange(IntervalLlegada, s, tickmax, avgstime);
+        SimulationWithChange(IntervalLlegada, TiempoCambio, s, tickmax, avgstime,1);
+        SimulationWithChangeRANDOM(IntervalLlegada, TiempoCambio, s, tickmax, avgstime,1);
+        SimulationWithoutChangeRANDOM(IntervalLlegada, s, tickmax, avgstime,1);
+        SimulationWithoutChange(IntervalLlegada, s, tickmax, avgstime,1);
 
 
 
@@ -897,6 +910,7 @@ int main(){
         int escenario;
         cout << "Escoge uno de los 5 escenarios" << endl << "1.3 cajeros con colas individuales" << endl << "2.3 cajeros con colas individuales pero los clientes pueden cambiar de cola despues de estar 15 minutos en una" << endl;
         cout << "3. Escenario igual que 1 pero escogiendo el cajero inicial aleatoriamente" << endl << "4.Escenario igual al 2 pero escogiendo el cajero incial aleatoriamente" << endl << "5.Cada de los 4 escenarios sequencialmente" << endl;
+        cout << "6. Ejecutar los 4 escenarios n veces con datos predefinidos, usos para la estadistica" << endl;
         cin >> escenario;
         ScenarioExecute(escenario);
     }
